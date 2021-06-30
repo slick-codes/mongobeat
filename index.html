@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+    <title>Document</title>
+    <style>
+        * {
+            font-family: arial;
+        }
+
+        span {
+            font-weight: bolder;
+            font-size: 15px;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .inner-container {
+            padding: 1em;
+            background: #ebebebf2;
+        }
+
+        div.progressbar {
+            width: 100%;
+            height: 0.1em;
+            background: rgb(202 202 202);
+            margin-bottom: 0.7em;
+            border-radius: 40em;
+        }
+
+        div.progressbar:hover {
+            transform: scaleY(3);
+        }
+
+        div.progressbar>div {
+            background-color: #ff0000;
+            height: inherit;
+            width: 0;
+            transition: width 0.2s;
+            display: flex;
+            align-items: center;
+            position: relative;
+            justify-content: flex-end;
+        }
+
+        div.progressbar>div::after {
+            content: "";
+            height: .5em;
+            width: .5em;
+            background: inherit;
+            position: absolute;
+            border-radius: 50em;
+        }
+
+        input[type=range] {
+            width: 4em;
+        }
+
+        .control_container {
+            display: flex;
+        }
+
+        .control_container ul:last-child {
+            display: flex;
+        }
+
+        #output {
+            width: 3em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="inner-container">
+            <div class="progressbar">
+                <div></div>
+            </div>
+            <div class="control_container">
+                <ul>
+                    <span id="time-output">0:0:0</span>
+                    <button id="prev" class=" fa fa-backward"></button>
+                    <button id="play" class="fa fa-play"></button>
+                    <button id="next" class="next fa fa-forward"></button>
+                    <button id="stop" class="fa fa-stop"></button>
+                </ul>
+                <ul>
+                    <input type="range" id="volume" min="0" max="100">
+                    <div id="output"></div>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="assets/script/main.js" type="module"></script>
+</body>
+
+</html>
