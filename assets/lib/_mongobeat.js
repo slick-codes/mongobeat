@@ -16,9 +16,11 @@ class Configuration {
         this.currentTimeInPersentage = 0
         this.normalDuration = ''
         this.normalCurrentTime = ''
+        this.nameList = ''
+        this.currentlyPlayingIndex = 0
     }
 
-    setNormalTime(totalSeconds) {
+    _setNormalTime(totalSeconds) {
 
         let hours = Math.floor(totalSeconds / 3600)
         totalSeconds %= 3600
@@ -36,12 +38,23 @@ class Configuration {
     update() {
         this.listLength = this.list.length
         this.dir = this.audio.src
+
+
         this.duration = this.audio.duration
         this.currentTime = this.audio.currentTime
+        const arr = []
+        for (let item of this.list) {
+            let name = item.split('/')[item.split('/').length - 1]
+            // console.log(name)
+            name = name.split('.').shift()
+            arr.push(name)
+        }
+        this.nameList = arr
 
-        this.normalDuration = this.setNormalTime(this.duration)
-        this.normalCurrentTime = this.setNormalTime(this.currentTime)
 
+        this.normalDuration = this._setNormalTime(this.duration)
+        this.normalCurrentTime = this._setNormalTime(this.currentTime)
+        this.currentlyPlayingIndex = this.listIndex
         this.volume = this.audio.volume
         this.currentTimeInPersentage = this.currentTime / this.duration * 100
         this.currentPlay = this.dir.split('/')[this.dir.split('/').length - 1]
@@ -289,21 +302,25 @@ class AudioStream extends Controls {
     constructor() {
         super()
     }
-    setList(arr, callback) { // add playlist
+    async setList(arr, callback) { // add playlist
         try {
             if (!Array.isArray(arr)) {
                 throw new Error('addList expects an array withing the parameta')
             }
             this.list = arr
             if (typeof arr[0] === 'string')
-                this.audio.src = arr[0]
+                await this.audio.setAttribute('src', arr[0])
+
+            this.update()
+
             if (typeof callback === 'function') // optional callback allowed
                 callback({ // return a success object
                     state: 'sucess',
                     data: this.list
                 })
-            this.update()
+            console.log(this.audio.duration)
         } catch (error) {
+            console.log('there was an error', error)
             if (typeof callback == 'function') {
                 callback(undefined, error)
             }
@@ -329,11 +346,12 @@ class AudioStream extends Controls {
         return this
     }
 
-    addTrack(track) { // add a single track
+    async addTrack(track) { // add a single track
         try {
             if (typeof track != 'string')
                 throw new Error('add signle track requires a string')
-            this.audio.src = track
+            // this.audio.src = track
+            await this.audio.setAttribute('src', track)
             this.update()
             const then = this
             if (typeof callback === 'function')
@@ -356,7 +374,14 @@ class AudioStream extends Controls {
             } else if (index < 0) {
                 index = this.list.length - 1
             }
+            const playing = this.isPlaying
             this.audio.src = this.list[index]
+            if (playing) {
+                this.play()
+            } else {
+                this.pause()
+            }
+            this.listIndex = index
             this.update()
             const then = this
             if (typeof callback === 'function')
@@ -369,6 +394,21 @@ class AudioStream extends Controls {
         }
         return this
     }
+    setTimeInSec(time) {
+        const playState = this.isPlaying
+        this.play()
+        this.audio.currentTime = (isNaN(time)) ? 0 : time
+
+        this.audio.addEventListener('loadmetadata', function () {
+            this.duration = this.audio.duration
+            this.currentTime = this.audio.currentTime
+        })
+
+        if (!playState) {
+            this.pause()
+        }
+        return this
+    }
 
     realTime(callback, speed) {
         if (typeof callback !== 'function')
@@ -377,7 +417,10 @@ class AudioStream extends Controls {
 
         interval = setInterval(() => {
             this.update()
-            if (!this.isPlaying) clearInterval(interval)
+            if (!this.isPlaying) {
+                clearInterval(interval)
+                return
+            }
             callback({
                 state: 'sucess',
                 currentTime: this.currentTime,
@@ -394,7 +437,5 @@ class AudioStream extends Controls {
     }
 
 }
-
-
 
 export default AudioStream

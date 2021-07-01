@@ -9,7 +9,29 @@
     <style>
         * {
             font-family: arial;
+            /* padding: 0; */
+            margin: 0;
         }
+
+        /*== ScrollBar styling==*/
+        ::-webkit-scrollbar {
+            width: 1em;
+            height: 10px;
+            background-color: #F1F1F1;
+        }
+
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 0px;
+            /* background: #C0C0C0; */
+            background: #44021a;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #9f043d;
+        }
+
+        /*==^^ScrollBar styling ^^==*/
 
         span {
             font-weight: bolder;
@@ -18,9 +40,48 @@
 
         .container {
             height: 100vh;
+            width: 25em;
+            position: relative;
+            overflow: hidden;
             display: flex;
+            margin: 0 auto;
+            flex-flow: column;
             justify-content: center;
-            align-items: center;
+            /* align-items: center; */
+        }
+
+        .playlist {
+            background: #9f043d;
+            height: 7em;
+            overflow: auto;
+            padding: 0;
+            /* width: 87%; */
+            padding: 0;
+            margin: 0;
+        }
+
+        .playlist ul {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .playlist li {
+            padding: 1.5em 1em;
+            color: White;
+            list-style: none;
+            text-align: center;
+            margin: 0;
+            /* margin-top: .4em; */
+            cursor: pointer;
+        }
+
+        .playlist li:first-child {
+            margin-top: 0;
+        }
+
+        .playlist li:hover {
+            background: black;
         }
 
         .inner-container {
@@ -28,65 +89,76 @@
             background: #ebebebf2;
         }
 
-        div.progressbar {
+        .progressbar-container {
             width: 100%;
-            height: 0.1em;
-            background: rgb(202 202 202);
-            margin-bottom: 0.7em;
-            border-radius: 40em;
-        }
-
-        div.progressbar:hover {
-            transform: scaleY(3);
-        }
-
-        div.progressbar>div {
-            background-color: #ff0000;
-            height: inherit;
-            width: 0;
-            transition: width 0.2s;
             display: flex;
             align-items: center;
-            position: relative;
-            justify-content: flex-end;
+            justify-content: center;
         }
 
-        div.progressbar>div::after {
-            content: "";
-            height: .5em;
-            width: .5em;
-            background: inherit;
-            position: absolute;
-            border-radius: 50em;
+        #time-output,
+        #duration-output {
+            width: 5em;
+            font-family: arial;
+            font-size: 13px;
+            font-weight: bolder;
+        }
+
+        #duration-output {
+            text-align: right;
+        }
+
+        .progressbar {
+            width: 100%;
+            height: 0.2em;
+            background: rgb(214, 214, 214);
+        }
+
+        .progressbar div {
+            pointer-events: none;
+            height: inherit;
+            width: 0;
+            background: purple;
         }
 
         input[type=range] {
-            width: 4em;
+            width: 7em;
         }
 
         .control_container {
             display: flex;
+            padding-top: 1em;
         }
 
         .control_container ul:last-child {
             display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bolder;
         }
 
         #output {
-            width: 3em;
+            /* width: 3em; */
+            padding: 0 1em;
+            justify-content: center;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
+        <div class="playlist"></div>
         <div class="inner-container">
-            <div class="progressbar">
-                <div></div>
+            <div class="progressbar-container">
+                <div id="time-output">0:0:0</div>
+                <div class="progressbar">
+                    <div></div>
+                </div>
+                <div id="duration-output">0:0:0</div>
             </div>
+
             <div class="control_container">
                 <ul>
-                    <span id="time-output">0:0:0</span>
                     <button id="prev" class=" fa fa-backward"></button>
                     <button id="play" class="fa fa-play"></button>
                     <button id="next" class="next fa fa-forward"></button>

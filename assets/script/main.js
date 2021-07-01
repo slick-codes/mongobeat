@@ -4,11 +4,19 @@ import MongoBeat from './../lib/_mongobeat.js'
 const playBtn = document.querySelector('#play')
 const nextBtn = document.querySelector('#next')
 const prevBtn = document.querySelector('#prev')
-const rageInput = document.querySelector('input[type=range]')
+const rangeInput = document.querySelector('input[type=range]')
 const stopBtn = document.querySelector('#stop')
 const progressBar = document.querySelector('.progressbar div')
 const timeOutput = document.querySelector('#time-output')
+const durationOutput = document.querySelector('#duration-output')
+
 const audio = new MongoBeat()
+
+const playlistContainer = document.querySelector('.playlist')
+
+
+
+
 const audioList = [
     'assets/media/audio.mp3',
     'assets/media/audio2.mp3',
@@ -17,45 +25,87 @@ const audioList = [
     'assets/media/audio5.mp3',
     'assets/media/audio6.mp3',
 ]
-audio.setList(audioList)
 
-playBtn.onclick = function () {
-    audio.toggle(function (data, error) {
-        if (error) return console.log('there was an error with toggler')
-        console.log(data.isPlaying ? 'playing' : 'paused')
+audio.setList(audioList, function () {
 
-    }).realTime((data, error) => {
+    const updateProgressBar = (data, error) => {
         if (error) return console.log('there was an error', error)
         progressBar.style.width = data.currentTimeInPersentage + '%'
         timeOutput.innerText = data.normalCurrentTime
+        durationOutput.innerText = data.normalDuration
+    }
+    console.log(audio.nameList)
+    function setPlaylist() {
+        const ul = document.createElement('ul')
+        for (let index in audio.nameList) {
+            const li = document.createElement('li')
+            li.setAttribute('data-index', index)
+            li.innerText = audio.nameList[index]
+            ul.appendChild(li)
+
+            li.onclick = function () {
+                let index = event.target.getAttribute('data-index')
+                index = Number(index)
+                audio.setByIndex(index, () => (!audio.isPlaying) && audio.play())
+                    .realTime(updateProgressBar, 200)
+            }
+        }
+        playlistContainer.appendChild(ul)
+    }
+    setPlaylist()
+
+
+
+    playBtn.onclick = function () {
+        audio.toggle()
+            .realTime(updateProgressBar, 200)
+    }
+
+    const progressBarContainer = document.querySelector('.progressbar')
+
+    function setTime() {
+        const elemWidth = event.target.offsetWidth
+        const offsetX = event.offsetX
+        const duration = audio.duration
+        const calc = (offsetX / elemWidth * duration)
+
+        audio.setTimeInSec(calc)
+    }
+
+    progressBarContainer.onclick = setTime
+    // progressBarContainer.onmousemove = setTime
+
+    stopBtn.onclick = () => audio.stop(function () {
+        progressBar.style.width = 0
+        timeOutput.innerText = '0:0:0'
+        // durationOutput.innerText = '0:0:0'
     })
-}
+    prevBtn.onclick = () => audio.prevTrack()
+    nextBtn.onclick = () => audio.nextTrack()
 
-stopBtn.onclick = function () {
-    audio.stop()
-}
-prevBtn.onclick = function () {
-    audio.prevTrack()
-}
-nextBtn.onclick = function () {
-    audio.nextTrack()
-}
-rageInput.oninput = function () {
-    const volume = Number(event.target.value)
-    audio.setVolume(volume)
-}
+    const volumeOutput = document.querySelector('#output')
 
-audio.onPlay(() => {
-    playBtn.className = "fa fa-pause"
+    window.onload = function () {
+        volumeOutput.innerText = rangeInput.value + '%'
+    }
 
-}).onPause(function () {
-    playBtn.className = 'fa fa-play'
+    rangeInput.oninput = () => {
+        const volume = Number(event.target.value)
+        audio.setVolume(volume)
+        volumeOutput.innerText = volume + '%'
+    }
 
-}).onAudioEnded(function () {
-    playBtn.className = 'fa fa-play'
-    console.log('running')
-    audio.nextTrack()
+    audio.onPlay(() => playBtn.className = "fa fa-pause")
+        .onPause(() => playBtn.className = 'fa fa-play')
+        .onAudioEnded(function () {
+            playBtn.className = 'fa fa-play'
+            console.log('running')
+            audio.nextTrack()
+        })
+
+
+
+
 })
-    .onChange(function () {
-        console.log('audio changed')
-    })
+// console.log(audio.duration)
+
